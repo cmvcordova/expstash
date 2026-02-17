@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-Mode B: Snapshot an experiment for reproducibility.
+Snapshot an experiment for reproducibility.
 Generates flattened config (no defaults) and pins tool commit.
 
 Usage:
-  python scripts/snapshot_experiment geomancy integration_test --tag v1.0
-  python scripts/snapshot_experiment geomancy topology_llm_test --tag thesis-final --commit
+  python3 scripts/snapshot_experiment geomancy integration_test --tag v1.0
+  python3 scripts/snapshot_experiment geomancy topology_llm_test --tag thesis-final --commit
 """
 
 import argparse
@@ -30,21 +30,29 @@ def get_tool_commit(tool: str) -> str:
     return result.stdout.strip()[:7] if result.returncode == 0 else "unknown"
 
 
-def resolve_config(tool: str, experiment: str) -> Optional[dict]:
+def resolve_config(tool: str, experiment: str, meta: dict) -> Optional[dict]:
     """Use tool's venv to get fully-resolved config via Hydra --cfg job."""
-    import json
-    import tempfile
-
     config_path = str(Path(f"configs/{tool}").resolve())
-    tool_path = Path(f"tools/{tool}")
+    tool_info = meta.get("tools", {}).get(tool, {})
+    tool_path = Path(tool_info.get("path", f"tools/{tool}"))
+    entrypoint = tool_info.get("entrypoint", f"-m {tool}.main")
 
-    # Use tool's uv run to invoke Hydra --cfg job
-    # This outputs resolved config to stdout
+    # Support run_from field for tools that need an inner subdirectory as CWD
+    run_from = tool_info.get("run_from")
+    if run_from:
+        tool_path = tool_path / run_from
+
+    if entrypoint.startswith("-m "):
+        module = entrypoint[3:]
+        cmd = ["python3", "-m", module]
+    else:
+        cmd = ["python3", entrypoint]
+
+    # Use group override, not --config-name
     result = subprocess.run(
-        [
-            "uv", "run", "python", "-m", f"{tool}.main",
+        ["uv", "run"] + cmd + [
             f"--config-path={config_path}",
-            f"--config-name=experiment/{experiment}",
+            f"experiment={experiment}",
             "--cfg", "job",
         ],
         cwd=tool_path,
@@ -145,11 +153,18 @@ def main():
         print(f"[ERROR] Experiment not found: {exp_file}")
         return 1
 
+    # Load meta.yaml for tool info
+    meta_path = Path("configs/meta.yaml")
+    if not meta_path.exists():
+        print("[ERROR] configs/meta.yaml not found")
+        return 1
+    meta = yaml.safe_load(meta_path.read_text())
+
     print(f"[INFO] Snapshotting {args.tool}/{args.experiment} as '{args.tag}'")
 
     # Resolve config
     print("[INFO] Resolving config (flattening defaults)...")
-    config = resolve_config(args.tool, args.experiment)
+    config = resolve_config(args.tool, args.experiment, meta)
     if not config:
         return 1
 
@@ -171,13 +186,23 @@ def main():
         if not create_commit(args.tool, args.experiment, args.tag, args.message):
             return 1
 
+        tool_info = meta.get("tools", {}).get(args.tool, {})
+        entrypoint = tool_info.get("entrypoint", f"-m {args.tool}.main")
+        run_from = tool_info.get("run_from")
+        if run_from:
+            tool_cwd = f"tools/{args.tool}/{run_from}"
+            config_rel = f"../../../configs/{args.tool}"
+        else:
+            tool_cwd = f"tools/{args.tool}"
+            config_rel = f"../../configs/{args.tool}"
         print("\n[INFO] To reproduce this experiment later:")
         print(f"  git checkout snapshot/{args.tag}")
         print("  git submodule update --init")
-        print(f"  python scripts/run_experiment {args.tool} {args.experiment}")
+        print(f"  cd {tool_cwd}")
+        print(f"  python3 {entrypoint} --config-path={config_rel} experiment={args.experiment}")
     else:
         print("\n[INFO] To commit this snapshot:")
-        print(f"  python scripts/snapshot_experiment {args.tool} {args.experiment} --tag {args.tag} --commit")
+        print(f"  python3 scripts/snapshot_experiment {args.tool} {args.experiment} --tag {args.tag} --commit")
 
     return 0
 

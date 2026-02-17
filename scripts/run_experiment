@@ -1,7 +1,15 @@
 #!/usr/bin/env python3
 """
-Experiment runner: python scripts/run_experiment <tool> <config_path>
-Example: python scripts/run_experiment manylatents figure1_method_comparison/pca_swissroll
+Run experiment using Hydra group overrides.
+
+Uses experiment=<name> (group override) instead of --config-name, which breaks
+Hydra composition. Supports run_from field in meta.yaml for tools that need an
+inner subdirectory as CWD.
+
+Usage:
+  python3 scripts/run_experiment manylatents eval_algorithm
+  python3 scripts/run_experiment manylatents eval_algorithm --validate-only
+  python3 scripts/run_experiment manylatents eval_algorithm seed=123
 """
 
 import sys
@@ -41,13 +49,14 @@ def validate_setup():
 
 def build_command(entrypoint, tool_config_dir, config_name, additional_args):
     if entrypoint.startswith("-m "):
-        base_cmd = ["python", "-m", entrypoint[3:]]
+        base_cmd = ["python3", "-m", entrypoint[3:]]
     else:
-        base_cmd = ["python", entrypoint]
+        base_cmd = ["python3", entrypoint]
 
+    # Use group override, not --config-name (which breaks Hydra composition)
     return base_cmd + [
         f"--config-path={tool_config_dir}",
-        f"--config-name=experiment/{config_name}"
+        f"experiment={config_name}"
     ] + additional_args
 
 
@@ -165,7 +174,12 @@ def main():
 
     info("Launching experiment...")
     search_packages = tool_info.get("search_packages")
-    return run_process(cmd, tool_path, search_packages=search_packages)
+
+    # Support run_from field for tools that need an inner subdirectory as CWD
+    run_from = tool_info.get("run_from")
+    run_cwd = os.path.join(tool_path, run_from) if run_from else tool_path
+
+    return run_process(cmd, run_cwd, search_packages=search_packages)
 
 
 if __name__ == "__main__":
