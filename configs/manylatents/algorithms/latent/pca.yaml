@@ -1,3 +1,0 @@
-_target_: manylatents.algorithms.latent.pca.PCAModule
-n_components: 2
-random_state: ${seed}

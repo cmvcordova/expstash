@@ -7,9 +7,9 @@ Hydra composition. Supports run_from field in meta.yaml for tools that need an
 inner subdirectory as CWD.
 
 Usage:
-  python3 scripts/run_experiment manylatents eval_algorithm
-  python3 scripts/run_experiment manylatents eval_algorithm --validate-only
-  python3 scripts/run_experiment manylatents eval_algorithm seed=123
+  python3 scripts/run_experiment mytool eval_algorithm
+  python3 scripts/run_experiment mytool eval_algorithm --validate-only
+  python3 scripts/run_experiment mytool eval_algorithm seed=123
 """
 
 import sys
@@ -129,7 +129,7 @@ def run_process(cmd, cwd, search_packages=None):
 
 def main():
     parser = argparse.ArgumentParser(description="Run experiments with direct config paths")
-    parser.add_argument("tool", help="Tool name (e.g., manylatents)")
+    parser.add_argument("tool", help="Tool name (e.g., mytool)")
     parser.add_argument("config_path", help="Config path (e.g., figure1_method_comparison/pca_swissroll)")
     parser.add_argument("--validate-only", action="store_true", help="Only validate, don't run")
     args, additional_args = parser.parse_known_args()

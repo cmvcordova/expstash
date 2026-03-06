@@ -85,13 +85,11 @@ jobs:
           cd experimentstash
 
           # Add your first tool
-          python3 scripts/add_tool.py <tool-name> <github-url>
+          python3 scripts/add_tool <tool-name> <github-url>
 
-          # Create an experiment
-          # Edit configs/example_experiment.yaml
-
-          # Run the experiment
-          python3 scripts/run_experiment <tool> <config>
+          # Run experiments — invoke the tool directly
+          cd tools/<tool>
+          uv run python -m <tool>.main --config-path=../../configs/<tool> experiment=<name>
           ```
 
           ## 📚 Documentation

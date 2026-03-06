@@ -1,2 +1,0 @@
-defaults:
-  - override /launcher: cpu_job

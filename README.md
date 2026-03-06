@@ -24,7 +24,7 @@ python3 scripts/add_tool mytool https://github.com/org/mytool
 
 # run experiments — invoke the tool directly, never through a bridge script
 cd tools/mytool
-uv run python -m mytool.main experiment=my_sweep
+uv run python -m mytool.main --config-path=../../configs/mytool experiment=my_sweep
 
 # freeze for reproduction
 python3 scripts/snapshot_experiment mytool my_sweep --tag camera-ready --commit
@@ -32,7 +32,7 @@ python3 scripts/snapshot_experiment mytool my_sweep --tag camera-ready --commit
 # reproduce anytime
 git checkout snapshot/camera-ready
 git submodule update --init
-cd tools/mytool && uv run python -m mytool.main experiment=my_sweep
+cd tools/mytool && uv run python -m mytool.main --config-path=../../configs/mytool experiment=my_sweep
 ```
 
 ---
@@ -58,7 +58,7 @@ Three layers for config composition (highest to lowest precedence):
 
 | Layer | Where | When |
 |-------|-------|------|
-| CLI overrides | `uv run python -m tool.main key=val` | always available |
+| CLI overrides | `uv run python -m tool.main --config-path=../../configs/tool key=val` | always available |
 | Experiment configs | `configs/<tool>/experiment/*.yaml` | sweep definitions |
 | Base configs (read-only) | `configs/<tool>/` | copied from tool, never edited |
 

@@ -1,3 +1,0 @@
-batch_size: 128
-num_workers: 1
-shuffle_traindata: True

@@ -10,7 +10,7 @@ python3 scripts/add_tool <name> <repo_url>
 
 # Run experiments — always invoke tools directly
 cd tools/<tool>
-uv run python -m <tool>.main <hydra overrides>
+uv run python -m <tool>.main --config-path=../../configs/<tool> <hydra overrides>
 
 # Freeze for reproduction
 python3 scripts/snapshot_experiment <tool> <experiment> --tag <tag> --commit
@@ -35,13 +35,13 @@ Three layers (highest to lowest precedence):
 
 | Layer | Where |
 |-------|-------|
-| CLI overrides | `uv run python -m tool.main key=val` |
+| CLI overrides | `uv run python -m tool.main --config-path=../../configs/tool key=val` |
 | Experiment configs | `configs/<tool>/experiment/*.yaml` |
 | Base configs (read-only) | `configs/<tool>/` (copied from tool) |
 
 ## Rules
 
-- **Invoke tools directly** — `uv run python -m <tool>.main`, not `run_experiment`.
+- **Invoke tools directly** — `uv run python -m <tool>.main --config-path=../../configs/<tool>`, not `run_experiment`.
 - **Copied configs are read-only** — never edit files in `configs/<tool>/` (except `experiment/`).
 - **Hydra group overrides** — `experiment=name` not `--config-name=experiment/name`.
 - **Never `pip install`** — always `uv sync` / `uv run`.

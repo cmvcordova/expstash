@@ -1,0 +1,7 @@
+# @package _global_
+message: "Hello from ExperimentStash config!"
+experiment_name: "Basic Integration Test"
+params:
+  test_param_1: "From experiment config"
+  test_param_2: 42
+  test_param_3: true

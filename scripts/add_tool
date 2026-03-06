@@ -7,8 +7,8 @@ metrics/) resolve at runtime via pkg:// SearchPathPlugins — copying them creat
 stale shadows that silently override upstream defaults.
 
 Usage:
-  python3 scripts/add_tool geomancy https://github.com/lrw/geomancy
-  python3 scripts/add_tool manylatents https://github.com/lrw/manylatents --entrypoint "-m manylatents.main"
+  python3 scripts/add_tool mytool https://github.com/org/mytool
+  python3 scripts/add_tool mytool https://github.com/org/mytool --entrypoint "-m mytool.main"
 """
 
 import argparse
