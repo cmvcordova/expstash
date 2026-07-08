@@ -1,3 +1,6 @@
 [submodule "hello-world"]
 	path = tools/hello-world
 	url = https://github.com/cmvcordova/hello-world.git
+[submodule "tools/right-answer-wrong-reason"]
+	path = tools/right-answer-wrong-reason
+	url = https://github.com/cmvcordova/right-answer-wrong-reason.git

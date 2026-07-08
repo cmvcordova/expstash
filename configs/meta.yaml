@@ -3,6 +3,11 @@ tools:
     path: tools/hydra-test-tool
     entrypoint: src/main.py
     description: "Minimal Hydra tool for testing ExperimentStash integration"
+  right-answer-wrong-reason:
+    path: tools/right-answer-wrong-reason
+    entrypoint: experiments/e1_switch_or_nudge/run.py
+    hydra: false
+    description: "SOAR I-1 — hint-following faithfulness (right answer, wrong reason). Script-per-experiment (experiments/e*/run.py), not a Hydra main; consumes manyagents+manylatents via local path deps. expstash pins the SHA as reproduction-of-record; buildable-from-submodule awaits path-dep -> git-pin swap."
 
 experiment:
   name: default
